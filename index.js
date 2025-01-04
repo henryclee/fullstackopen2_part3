@@ -1,6 +1,15 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 app.use(express.json())
+
+
+morgan.token('content', function getContent(req, res) {
+    return (JSON.stringify(req.body))
+})
+
+app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :content`))
 
 let persons = [
     { 
@@ -34,13 +43,13 @@ app.post('/api/persons', (request, response) => {
     const body = request.body
 
     if (!body.name || !body.number) {
-        response.status(400).json({
+        return response.status(400).json({
             error: 'Missing name and or number'
         })
     }
 
     if (persons.find(person => person.name === body.name)) {
-        response.status(400).json({
+        return response.status(400).json({
             error: `${body.name} is already in the phonebook`
         })
     }
@@ -52,7 +61,7 @@ app.post('/api/persons', (request, response) => {
     }
 
     persons = persons.concat(person)
-    response.json(person)
+    return response.json(person)
 
 })
 
